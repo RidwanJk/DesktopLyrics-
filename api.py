@@ -42,8 +42,7 @@ def extract_lyrics(html_content):
         return "Lyrics not found in the expected format"
 
 def main():
-    song_title = input("Enter the song title: ")
-    api_token = "7BUjs-LqTGZ1MxOcoPoSQh9XQ-OGNnwZ9s1_kaTYoTezILHEKfsax7tduZZBNR4N"  # Replace with your actual Genius API token
+    song_title = input("Enter the song title: ")    
 
     lyrics = get_song_lyrics(song_title, api_token)    
     extractedLyrics = extract_lyrics(lyrics)
