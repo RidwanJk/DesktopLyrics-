@@ -1,19 +1,44 @@
 import sys
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDateEdit,
+    QDateTimeEdit,
+    QDial,
+    QDoubleSpinBox,
+    QFontComboBox,
+    QLabel,
+    QLCDNumber,
+    QLineEdit,
+    QMainWindow,
+    QProgressBar,
+    QPushButton,
+    QRadioButton,
+    QSlider,
+    QSpinBox,
+    QTimeEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
 
 class TransparentWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         layout = QVBoxLayout()
 
-        self.label = QLabel("Welcome to PyQt", self)
+        self.label = QLabel("Lyrics App", self)
         layout.addWidget(self.label)
-
+        search = QLineEdit(self)
+        layout.addWidget(search)
+        
         button = QPushButton("Click Me", self)
         button.clicked.connect(self.on_button_click)
         layout.addWidget(button)
@@ -28,4 +53,4 @@ app = QApplication(sys.argv)
 window = TransparentWindow()
 window.show()
 
-sys.exit(app.exec_())
+sys.exit(app.exec())
