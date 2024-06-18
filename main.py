@@ -1,25 +1,12 @@
 import sys
+import os
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QApplication,
-    QCheckBox,
-    QComboBox,
-    QDateEdit,
-    QDateTimeEdit,
-    QDial,
-    QDoubleSpinBox,
-    QFontComboBox,
-    QLabel,
-    QLCDNumber,
-    QLineEdit,
-    QMainWindow,
-    QProgressBar,
+    QLabel,    
+    QLineEdit,    
     QPushButton,
-    QRadioButton,
-    QSlider,
-    QSpinBox,
-    QTimeEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -35,18 +22,31 @@ class TransparentWindow(QWidget):
         layout = QVBoxLayout()
 
         self.label = QLabel("Lyrics App", self)
-        layout.addWidget(self.label)
-        search = QLineEdit(self)
-        layout.addWidget(search)
+        layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.search = QLineEdit(self)
+        layout.addWidget(self.search)
         
-        button = QPushButton("Click Me", self)
-        button.clicked.connect(self.on_button_click)
-        layout.addWidget(button)
+        self.button = QPushButton("Search", self)
+        self.button.clicked.connect(self.on_button_click)
+        layout.addWidget(self.button)
 
         self.setLayout(layout)
+        self.hasclicked = False
 
     def on_button_click(self):
-        self.label.setText("Hello, World!")
+        if not self.hasclicked:
+            self.search.hide()
+            self.label.setText("Lyrics for " + self.search.text())
+            self.button.setText("Go Back")
+            self.hasclicked = True
+        else:
+            self.search.show()
+            self.label.setText("Lyrics App")
+            self.button.setText("Search")
+            self.hasclicked = False
+    
+    
+        
 
 app = QApplication(sys.argv)
 
