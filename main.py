@@ -61,12 +61,25 @@ class TransparentWindow(QWidget):
             lyrics = get_song_lyrics(self.search.text(), api_token)
             extracted_lyrics = extract_lyrics(lyrics)
             SaveLyrics(extracted_lyrics, f"{self.search.text()}.txt")
-            
+
+            # Decode the file with BeautifulSoup
+            file_path = f"{self.search.text()}.txt"
+            if os.path.exists(file_path):
+                with open(file_path, "r", encoding="utf-8") as file:
+                    lyrics_content = file.read()
+                    soup = bs(lyrics_content, "html.parser")
+                    cleaned_lyrics = soup.get_text(separator="\n")  # Separate lines for better display
+                    even_cleaner_lyrics = cleaned_lyrics[1:-1] 
+                    self.label.setText(even_cleaner_lyrics)                                        
+            else:
+                self.label.setText("Error: Lyrics file not found")
+        
         else:
             self.search.show()
             self.label.setText("Lyrics App")
             self.button.setText("Search")
             self.hasclicked = False
+
 
 
 app = QApplication(sys.argv)
