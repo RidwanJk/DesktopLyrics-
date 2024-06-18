@@ -1,10 +1,11 @@
 import sys
 import os
 from bs4 import BeautifulSoup as bs
+from torch import Size
 from api import get_song_lyrics, extract_lyrics, SaveLyrics
 from apikey import api_token
-
-from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtGui import QColor
+from PyQt6.QtCore import Qt, QPoint, QSize
 from PyQt6.QtWidgets import (
     QApplication,
     QLabel,    
@@ -12,22 +13,45 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
     QWidget,
+    QScrollArea
 )
 
 
 class TransparentWindow(QWidget):
     def __init__(self):
         super().__init__()
-
+        
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setMinimumSize(QSize(600, 800))
 
         layout = QVBoxLayout()
 
-        self.label = QLabel("Lyrics App", self)
-        layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignCenter)
+        # Create a QScrollArea
+        scroll_area = QScrollArea()
+        layout.addWidget(scroll_area)
+
+        # Create a widget to contain the label
+        scroll_widget = QWidget()
+        scroll_area.setWidget(scroll_widget)
+        scroll_area.setWidgetResizable(True)  # Allow the scroll area to resize its content widget
+
+        # Use a QVBoxLayout for the scroll widget
+        scroll_layout = QVBoxLayout(scroll_widget)
+
+        self.label = QLabel("Lyrics App", scroll_widget)
+        scroll_layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.label.setStyleSheet("QLabel { font-size: 20px; color: White; }")
+
+        self.searchlabel = QLabel("Search for a song", self)
         self.search = QLineEdit(self)
+        layout.addWidget(self.searchlabel)        
         layout.addWidget(self.search)
+        self.artist_name = QLabel("Artist Optional", self)
+        self.artist = QLineEdit(self)
+        layout.addWidget(self.artist_name)        
+        layout.addWidget(self.artist)
+        
 
         self.button = QPushButton("Search", self)
         self.button.clicked.connect(self.on_button_click)
@@ -36,6 +60,7 @@ class TransparentWindow(QWidget):
         self.setLayout(layout)
         self.hasclicked = False
         self.oldPos = self.pos()  # Store the initial position of the window
+
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -58,7 +83,10 @@ class TransparentWindow(QWidget):
             self.button.setText("Go Back")
             self.hasclicked = True
             # Call the function to search and save lyrics
-            lyrics = get_song_lyrics(self.search.text(), api_token)
+            self.search.text()
+            self.artist.text()
+            lyrics = get_song_lyrics(self.search.text(), self.artist.text() ,api_token) 
+            
             extracted_lyrics = extract_lyrics(lyrics)
             SaveLyrics(extracted_lyrics, f"{self.search.text()}.txt")
 
@@ -80,6 +108,12 @@ class TransparentWindow(QWidget):
             self.button.setText("Search")
             self.hasclicked = False
 
+    def get_text_color_style(self, bg_color):
+        luminance = QColor(bg_color).lightnessF() 
+        if luminance > 0.5:  # If background is light, set text color to black
+            return "QLabel { font-size: 14px; color: black; background-color: white; }"
+        else:  # If background is dark, set text color to white
+            return "QLabel { font-size: 14px; color: white; background-color: black; }"
 
 
 app = QApplication(sys.argv)

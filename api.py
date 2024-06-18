@@ -2,14 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 from apikey import api_token
 
-def get_song_lyrics(song_title, api_token):
+def get_song_lyrics(song_title, artist_name, api_token):
     base_url = "https://api.genius.com"
     headers = {
         "Authorization": f"Bearer {api_token}"
     }
     search_url = base_url + "/search?"
+    query = f"{song_title} {artist_name}"
     params = {
-        'q': song_title
+        'q': query
     }
     response = requests.get(search_url, headers=headers, params=params)
     json_data = response.json()
@@ -39,7 +40,7 @@ def extract_lyrics(html_content):
     if lyrics_div:
         return str(lyrics_div)
     else:
-        return "Lyrics not found in the expected format"
+        return "[Lyrics not found in the expected format]"
 
 def main():
     song_title = input("Enter the song title: ")    
