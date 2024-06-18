@@ -2,6 +2,7 @@ import sys
 import os
 from bs4 import BeautifulSoup as bs
 from api import get_song_lyrics, extract_lyrics, SaveLyrics
+from apikey import api_token
 
 from PyQt6.QtCore import Qt, QPoint
 from PyQt6.QtWidgets import (
@@ -57,7 +58,7 @@ class TransparentWindow(QWidget):
             self.button.setText("Go Back")
             self.hasclicked = True
             # Call the function to search and save lyrics
-            lyrics = get_song_lyrics(self.search.text(), "7BUjs-LqTGZ1MxOcoPoSQh9XQ-OGNnwZ9s1_kaTYoTezILHEKfsax7tduZZBNR4N")
+            lyrics = get_song_lyrics(self.search.text(), api_token)
             extracted_lyrics = extract_lyrics(lyrics)
             SaveLyrics(extracted_lyrics, f"{self.search.text()}.txt")
             
