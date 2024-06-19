@@ -15,12 +15,13 @@ from PyQt6.QtWidgets import (
     QWidget,
     QScrollArea
 )
+from Spotify import get_current_playing, get_spotify_token
 
 
 class TransparentWindow(QWidget):
     def __init__(self):
         super().__init__()
-        
+           
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setMinimumSize(QSize(600, 800))
@@ -108,12 +109,18 @@ class TransparentWindow(QWidget):
             self.button.setText("Search")
             self.hasclicked = False
 
-    def get_text_color_style(self, bg_color):
-        luminance = QColor(bg_color).lightnessF() 
-        if luminance > 0.5:  # If background is light, set text color to black
-            return "QLabel { font-size: 14px; color: black; background-color: white; }"
-        else:  # If background is dark, set text color to white
-            return "QLabel { font-size: 14px; color: white; background-color: black; }"
+    def on_button_current_track_click(self):
+        access_token = get_spotify_token() 
+        if access_token:
+            track, artist = get_current_playing(access_token)
+            if track and artist:
+                self.search.setText(track)
+                self.artist.setText(artist)
+                
+            else:
+                self.label.setText("No track is currently playing")
+        else:
+            self.label.setText("Failed to get access token")
 
 
 app = QApplication(sys.argv)
