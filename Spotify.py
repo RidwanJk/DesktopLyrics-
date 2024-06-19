@@ -1,24 +1,54 @@
 import requests
 import webbrowser
-import json
 from urllib.parse import urlencode, urlparse, parse_qs
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget
+import http.server
+import threading
+import apikey
 
-CLIENT_ID = '853fe2d917894e31b39b9c9ebe865d1c'
-CLIENT_SECRET = '110ff2eee7bc434888c877bdb4932e33'
-REDIRECT_URI = 'http://localhost:8888/callback'
+CLIENT_ID = apikey.CLIENT_ID
+CLIENT_SECRET = apikey.CLIENT_SECRET
+REDIRECT_URI = 'http://localhost:8888/callback/'  # Ensure this matches the registered URI
 SCOPES = 'user-read-currently-playing'
+TOKEN = None
+
+class TokenHandler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        global TOKEN
+        query = urlparse(self.path).query
+        code = parse_qs(query).get('code')
+        if code:
+            TOKEN = get_access_token(code[0])
+            print("Access Token received:", TOKEN)
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b'You can close this window now')
+
+def start_server():
+    server = http.server.HTTPServer(('localhost', 8888), TokenHandler)
+    server.handle_request()
 
 def get_spotify_token():
     auth_url = f"https://accounts.spotify.com/authorize?client_id={CLIENT_ID}&response_type=code&redirect_uri={REDIRECT_URI}&scope={SCOPES}"
     webbrowser.open(auth_url)
-    
-    # Wait for the redirect to your REDIRECT_URI and get the code from the URL
-    # This part should be handled by a web server or manually by the user
-    auth_response = input("Paste the URL you were redirected to: ")
-    code = parse_qs(urlparse(auth_response).query)['code'][0]
-    
+    server_thread = threading.Thread(target=start_server)
+    server_thread.start()
+    server_thread.join()
+    return TOKEN
+
+def get_access_token(code):
     token_url = "https://accounts.spotify.com/api/token"
+    payload = {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': REDIRECT_URI,
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET
+    }
+    response = requests.post(token_url, data=payload)
+    token_data = response.json()
+    return token_data.get('access_token')
 
 def get_current_playing(access_token):
     headers = {
@@ -55,11 +85,14 @@ class LyricsApp(QMainWindow):
     
     def show_current_track(self):
         access_token = get_spotify_token()
-        track, artist = get_current_playing(access_token)
-        if track and artist:
-            self.label.setText(f"Current Track: {track} by {artist}")
+        if access_token:
+            track, artist = get_current_playing(access_token)
+            if track and artist:
+                self.label.setText(f"Current Track: {track} by {artist}")
+            else:
+                self.label.setText("No track is currently playing")
         else:
-            self.label.setText("No track is currently playing")
+            self.label.setText("Failed to get access token")
 
 if __name__ == '__main__':
     app = QApplication([])

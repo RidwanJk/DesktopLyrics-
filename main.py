@@ -24,7 +24,7 @@ class TransparentWindow(QWidget):
            
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setMinimumSize(QSize(600, 800))
+        self.setMinimumSize(600, 800)
 
         layout = QVBoxLayout()
 
@@ -54,10 +54,15 @@ class TransparentWindow(QWidget):
         layout.addWidget(self.artist)
         
 
-        self.button = QPushButton("Search", self)
-        self.button.clicked.connect(self.on_button_click)
-        layout.addWidget(self.button)
-
+        self.button_search = QPushButton("Search", self)
+        self.button_search.clicked.connect(self.on_button_click)
+        layout.addWidget(self.button_search)
+        
+        # Add button to get current track
+        self.button_current_track = QPushButton("Get Current Track", self)
+        self.button_current_track.clicked.connect(self.on_button_current_track_click)
+        layout.addWidget(self.button_current_track)
+        
         self.setLayout(layout)
         self.hasclicked = False
         self.oldPos = self.pos()  # Store the initial position of the window
@@ -79,15 +84,18 @@ class TransparentWindow(QWidget):
 
     def on_button_click(self):
         if not self.hasclicked:
+            self.button_current_track.hide()
+            self.searchlabel.hide()
+            self.artist_name.hide()
+            self.artist.hide()
             self.search.hide()
             self.label.setText("Lyrics for " + self.search.text())
-            self.button.setText("Go Back")
+            self.button_search.setText("Go Back")
             self.hasclicked = True
             # Call the function to search and save lyrics
             self.search.text()
             self.artist.text()
-            lyrics = get_song_lyrics(self.search.text(), self.artist.text() ,api_token) 
-            
+            lyrics = get_song_lyrics(self.search.text(), self.artist.text() ,api_token)             
             extracted_lyrics = extract_lyrics(lyrics)
             SaveLyrics(extracted_lyrics, f"{self.search.text()}.txt")
 
@@ -105,8 +113,12 @@ class TransparentWindow(QWidget):
         
         else:
             self.search.show()
+            self.artist.show()
+            self.searchlabel.show()
+            self.artist_name.show()
+            self.button_current_track.show()
             self.label.setText("Lyrics App")
-            self.button.setText("Search")
+            self.button_search.setText("Search")
             self.hasclicked = False
 
     def on_button_current_track_click(self):
