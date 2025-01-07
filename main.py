@@ -1,9 +1,8 @@
 import sys
 import os
 from bs4 import BeautifulSoup as bs
-from torch import Size
 from api import get_song_lyrics, extract_lyrics, SaveLyrics
-from apikey import api_token
+from apikey import api_token, TOKEN
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt, QPoint, QSize
 from PyQt6.QtWidgets import (
@@ -121,8 +120,10 @@ class TransparentWindow(QWidget):
             self.button_search.setText("Search")
             self.hasclicked = False
 
-    def on_button_current_track_click(self):
-        access_token = get_spotify_token() 
+    def on_button_current_track_click(self):            
+            
+            
+        access_token = get_spotify_token()
         if access_token:
             track, artist = get_current_playing(access_token)
             if track and artist:

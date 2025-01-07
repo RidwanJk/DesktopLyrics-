@@ -1,7 +1,7 @@
 import requests
 import webbrowser
 from urllib.parse import urlencode, urlparse, parse_qs
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget
+
 import http.server
 import threading
 import apikey
@@ -36,7 +36,7 @@ def get_spotify_token():
     server_thread.start()
     server_thread.join()
     return TOKEN
-
+    
 def get_access_token(code):
     token_url = "https://accounts.spotify.com/api/token"
     payload = {
@@ -62,40 +62,6 @@ def get_current_playing(access_token):
         return track_name, artist_name
     return None, None
 
-class LyricsApp(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.initUI()
-    
-    def initUI(self):
-        self.setWindowTitle('Lyrics App with Spotify Integration')
-        
-        layout = QVBoxLayout()
-        
-        self.label = QLabel("Current Track: None")
-        layout.addWidget(self.label)
-        
-        self.button = QPushButton("Get Current Track")
-        self.button.clicked.connect(self.show_current_track)
-        layout.addWidget(self.button)
-        
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
-    
-    def show_current_track(self):
-        access_token = get_spotify_token()
-        if access_token:
-            track, artist = get_current_playing(access_token)
-            if track and artist:
-                self.label.setText(f"Current Track: {track} by {artist}")
-            else:
-                self.label.setText("No track is currently playing")
-        else:
-            self.label.setText("Failed to get access token")
+def saveToken(TOKEN):    
+    apikey.TOKEN = TOKEN
 
-if __name__ == '__main__':
-    app = QApplication([])
-    window = LyricsApp()
-    window.show()
-    app.exec()
